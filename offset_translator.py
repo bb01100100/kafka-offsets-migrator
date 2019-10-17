@@ -412,17 +412,17 @@ class OffsetTranslator():
     errored_commits = list()
     retries = 3
     while retries > 0:
-      self.logger.info(f"Calling commit() for {len(tpos)} topic/partitions to destination cluster.")
+      self.logger.info(f" Calling commit() for {len(tpos)} topic/partitions to destination cluster.")
       committed = self._dest_consumer.commit(offsets=tpos, asynchronous=False)
 
       for t in [t for t in committed if t.error is not None]:
         errored_commits.append(t)
 
       if len(errored_commits) > 0:
-        self.logger.warning(f"Errors commiting offsets:")
+        self.logger.warning(f"  Errors commiting offsets:")
         for t in errored_commits:
-          self.logger.info(f"     Partition({t.partition}), Offset({t.offset}): {t.error}")
-        self.logger.info(f"Trying again in 2 seconds...")
+          self.logger.info(f"       Partition({t.partition}), Offset({t.offset}): {t.error}")
+        self.logger.info(f"  Trying again in 2 seconds...")
         time.sleep(2)
         tpos = errored_commits
         errored_commits = list()
@@ -522,6 +522,16 @@ class OffsetTranslator():
     self.logger.info(f"Found offsets for {len(tpos)} topic partitions.")
     return tpos
 
+
+  def allOffsetsMatched(self):
+    """Test that all metadata has a matched == True value """
+    self.logger.info("Checking that all metadata records were matched in the destination cluster...")
+    for md in self._metadata:
+      if self._metadata[md]['matched'] == False:
+        self.logger.info("Unmatched metadata records found.")
+        return False
+    self.logger.info("All metadata was matched.")
+    return True
 
 
   def findTopicsForConsumerGroup(self, cg=None):
@@ -651,7 +661,13 @@ if __name__ == '__main__':
     print("Generating list of translated offsets...")
     translated_offsets = ot.compareOffsets()
 
+    print("Offsets to be commited in destination cluster are:")
     for o in translated_offsets:
         print(f"  topic: {o.topic}, partition {o.partition}, offset {o.offset}")
  
-    res = ot.commitTranslatedOffsets(translated_offsets)
+    if ot.allOffsetsMatched():
+      res = ot.commitTranslatedOffsets(translated_offsets)
+    else:
+      self.logger.info("Not of the topic partition offsets found in the source cluster were found in the destination cluster!")
+      self.logger.info("Will not commit offsets at this time.")
+      
