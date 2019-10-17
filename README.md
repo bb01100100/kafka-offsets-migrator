@@ -33,6 +33,7 @@ For scenario (1) above, we:
 ## Limits, Warnings and shrugging of shoulders
 
 1. We assume that messages in the destination cluster *have not been mutated in any way*:
+
  . timestamps are the same - there are cluster replication settings that invalidate this requirement, so do check this
  . payload is byte for byte the same as the source - otherwise our hashing will fail
  . not reordered 
