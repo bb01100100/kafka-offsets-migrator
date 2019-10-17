@@ -1,0 +1,55 @@
+---
+version: '2'
+services:
+  zookeeper1:
+    image: confluentinc/cp-zookeeper:5.3.0
+    hostname: zookeeper1
+    container_name: zookeeper1
+    ports:
+      - "20181:20181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 20181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  zookeeper2:
+    image: confluentinc/cp-zookeeper:5.3.0
+    hostname: zookeeper2
+    container_name: zookeeper2
+    ports:
+      - "20182:20182"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 20182
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker1:
+    image: confluentinc/cp-enterprise-kafka:5.3.0
+    hostname: broker1
+    container_name: broker1
+    depends_on:
+      - zookeeper1
+    ports:
+      - "29091:29091"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper1:20181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:9092,PLAINTEXT_HOST://localhost:29091
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  broker2:
+    image: confluentinc/cp-enterprise-kafka:5.3.0
+    hostname: broker2
+    container_name: broker2
+    depends_on:
+      - zookeeper2
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper2:20182'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
