@@ -43,14 +43,20 @@ For scenario (1) above, we:
 
 ## Testing
 There is a reasonable test suite in place that checks a few things here and there. It uses docker-compose to spin up some Confluent Platform 5.3.0 images:
+
  . 2x zookeeper
+ 	  * zookeeper1:20181
+ 	  * zookeeper2:20182
  . 2x broker
+     * broker1:29091
+     * broker2:29092
 
 Each broker+zk pair is configured as a separate cluster
 
-You can start your containers prior, or let pytest spin them up:
+You can start your containers prior, or let pytest spin them up. Example of using running containers:
 
 ```
+  cd tests
   pytest --docker-compose-no-build 
          --use-running-containers 
          --docker-compose=docker-compose.yml 
@@ -87,4 +93,4 @@ It will log to stdout and also to a local file called `offset_translator.log`.
 ## Finally
 - While I enjoyed writing this, you may not enjoy the results of using it - run away while you can. 
 - Not tested on animals, or in production for that matter.
-- It would be nice to have a topic regex feature
+- It would be nice to have a topic regex feature to transform source topics to destination topics
