@@ -5,7 +5,7 @@ import logging
 import datetime
 from confluent_kafka import Consumer, Producer, TopicPartition
 from confluent_kafka.admin import AdminClient, NewTopic
-from ..offset_translator import OffsetTranslator
+from offset_translator import OffsetTranslator
 
 pytest_plugins = ['docker_compose']
 
