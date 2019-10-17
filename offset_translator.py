@@ -540,7 +540,7 @@ class OffsetTranslator():
     if cg is None:
         cg = self._src_group_id
 
-    cmd = f"kafka-consumer-groups --bootstrap-server {self._src_bootstrap_servers} --describe --group {cg}  2>/dev/null| grep {cg} | awk '{{print $2}}' | sort -u"
+    cmd = f"kafka-consumer-groups --bootstrap-server {self._src_bootstrap_servers} --describe --group {cg}  2>/dev/null| grep {cg} | grep -v 'Error: Consumer group '| awk '{{print $2}}' | sort -u"
     self.logger.info(f"Running {cmd}")
     res = subprocess.run(cmd,shell=True,stdout=subprocess.PIPE)
 
@@ -549,11 +549,18 @@ class OffsetTranslator():
       if topic != '':
         cg_topics.append(topic) 
 
+    print(f">>>>>>{cg_topics}>>>>>")
+    if len(cg_topics) == 0:
+      raise Exception(f"No topics found for consumer group {cg}. Nothing to do. Stopping.")
+
     # If we were configured to run for just one topic in a CG; then return just that topic,
     # but only if it exists in the CG
-    if self._src_topic is not None and self._src_topic in cg_topics:
-      self.logger.info("Overriding topic list from CG tool with supplied topic.")
-      cg_topics = [self._src_topic]
+    if self._src_topic is not None:
+      if self._src_topic in cg_topics:
+         self.logger.info("Overriding topic list from CG tool with supplied topic.")
+         cg_topics = [self._src_topic]
+      else:
+        raise Exception(f"{self._src_topic} is not associated with {cg}. Stopping.")
 
     self.logger.info(f"Returning {cg_topics}...")
     return(cg_topics)
