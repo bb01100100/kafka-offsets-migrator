@@ -34,10 +34,10 @@ For scenario (1) above, we:
 
 1. We assume that messages in the destination cluster *have not been mutated in any way*:
 
- . timestamps are the same - there are cluster replication settings that invalidate this requirement, so do check this
- . payload is byte for byte the same as the source - otherwise our hashing will fail
- . not reordered 
- . not repartitioned
+  - timestamps are the same - there are cluster replication settings that invalidate this requirement, so do check this
+  - payload is byte for byte the same as the source - otherwise our hashing will fail
+  - not reordered 
+  - not repartitioned
 
 2. We assume the source and destination consumer group and topic names are the same.
 
@@ -95,3 +95,5 @@ It will log to stdout and also to a local file called `offset_translator.log`.
 - While I enjoyed writing this, you may not enjoy the results of using it - run away while you can. 
 - Not tested on animals, or in production for that matter.
 - It would be nice to have a topic regex feature to transform source topics to destination topics
+- It works one TopicPartition at a time, so may be slow for operations involving many topic partitions
+
